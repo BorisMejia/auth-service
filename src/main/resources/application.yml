@@ -1,0 +1,29 @@
+server:
+  port: 8010
+  
+spring:
+  application:
+    name: mc-auth
+  webflux:
+    base-path: /api
+  security:
+    user:
+      name: none
+      password: none
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5433/auth_db
+    username: auth_user
+    password: auth_pass
+
+  main:
+    web-application-type: reactive
+
+  codec:
+    max-in-memory-size: 10MB
+
+logging:
+  level:
+    root: INFO
+    org.springframework.r2dbc.core: DEBUG
+    org.springframework.security: DEBUG
