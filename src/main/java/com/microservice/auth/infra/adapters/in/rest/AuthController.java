@@ -3,6 +3,7 @@ package com.microservice.auth.infra.adapters.in.rest;
 import com.microservice.auth.application.dto.request.AuthLoginDto;
 import com.microservice.auth.application.dto.request.AuthRegisterDto;
 import com.microservice.auth.application.dto.response.AuthResponse;
+import com.microservice.auth.application.dto.response.RegisterResponseDto;
 import com.microservice.auth.application.service.AuthService;
 import com.microservice.auth.shared.exception.UserAlreadyExistsException;
 import jakarta.validation.Valid;
@@ -25,17 +26,21 @@ public class AuthController {
     @PostMapping("/login")
     public Mono<ResponseEntity<AuthResponse>> login(@Valid @RequestBody AuthLoginDto loginDto) {
         return authService.loginUser(loginDto)
-                .map(token -> ResponseEntity.ok(token))
+                .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity
                         .status(HttpStatus.UNAUTHORIZED)
                         .body(new AuthResponse("Error: " + e.getMessage()))));
     }
 
     @PostMapping("/register")
-    public Mono<ResponseEntity<Object>> register(@Valid @RequestBody AuthRegisterDto registerDto) {
+    public Mono<ResponseEntity<RegisterResponseDto>> register(@Valid @RequestBody AuthRegisterDto registerDto) {
         return authService.registerUser(registerDto)
-                .map(msg -> ResponseEntity.ok(msg))
+                .map(ResponseEntity::ok)
                 .onErrorResume(UserAlreadyExistsException.class,
-                        ex -> Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage())));
+                        ex -> Mono.just(ResponseEntity
+                                .status(HttpStatus.CONFLICT)
+                                .body(new RegisterResponseDto(ex.getMessage())))
+                );
     }
+
 }

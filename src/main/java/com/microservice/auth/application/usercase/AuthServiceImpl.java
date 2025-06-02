@@ -3,6 +3,7 @@ package com.microservice.auth.application.usercase;
 import com.microservice.auth.application.dto.request.AuthLoginDto;
 import com.microservice.auth.application.dto.request.AuthRegisterDto;
 import com.microservice.auth.application.dto.response.AuthResponse;
+import com.microservice.auth.application.dto.response.RegisterResponseDto;
 import com.microservice.auth.application.service.AuthService;
 import com.microservice.auth.application.service.JwtUtilityService;
 import com.microservice.auth.domain.model.User;
@@ -36,10 +37,10 @@ public class AuthServiceImpl implements AuthService {
                 });
     }
 
-    public Mono<Object> registerUser(AuthRegisterDto registerDto){
+    public Mono<RegisterResponseDto> registerUser(AuthRegisterDto registerDto) {
         return userRepository.findByEmail(registerDto.email())
-                .flatMap(user -> Mono.error(new UserAlreadyExistsException(registerDto.email())))
-                .switchIfEmpty(Mono.defer(()->{
+                .flatMap(user -> Mono.<RegisterResponseDto>error(new UserAlreadyExistsException(registerDto.email())))
+                .switchIfEmpty(Mono.defer(() -> {
                     User user = new User(
                             null,
                             registerDto.name(),
@@ -47,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
                             passwordEncoder.encode(registerDto.password())
                     );
                     return userRepository.save(user)
-                            .thenReturn("User successfully registered ");
+                            .thenReturn(new RegisterResponseDto("User successfully registered"));
                 }));
     }
 
